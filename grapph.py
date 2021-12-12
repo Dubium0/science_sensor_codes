@@ -1,38 +1,30 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Dec 12 12:55:11 2021
-
-@author: LENOPC
-"""
-
 import rospy
 import matplotlib.pyplot as plt
-from std_msgs.msg import UInt8
+from std_msgs.msg import String
 
+df = {"temperature":[],"altitude":[],"pressure":[]}
 
-
-dictionary = {"temperature":[],"altitude":[],"pressure":[]}
-name_list = ["pressure","altitude","temperature"]
-x = 0
-def data_collect(data):
-    dictionary[name_list].append(data.data)
-    x+=1
-
+def plotting(data):
+    data_list = data.data.split(",")
     
+    df["temperature"].append(float(data_list[0]))
+    df["altitude"].append(float(data_list[2]))
+    df["pressure"].append(float(data_list[1]))
     
-def plotting():
     plt.subplot(3,1,1)
-    plt.plot(df["temperature"],color = "blue",label = "temperature")
-    plt.ylabel("C")
-    plt.legend()
+    plt.plot(df["temperature"],color = "blue")
+    plt.ylabel("Celcius")
+    
     plt.subplot(3,1,2)
-    plt.plot(df["altitude"],color = "red",label = "altitude")
-    plt.ylabel("m")
-    plt.legend()
+    plt.plot(df["altitude"],color = "red")
+    plt.ylabel("meter")
+    
     plt.subplot(3,1,3)
-    plt.plot(df["pressure"],color = "yellow",label = "pressure")
+    plt.plot(df["pressure"],color = "yellow")
     plt.ylabel("Pa")
-    plt.legend()
+    
     plt.draw()
     plt.pause(0.0001)
     
@@ -42,7 +34,6 @@ def plotting():
 if __name__ == '__main__' :
     
 	rospy.init_node('graph' , anonymous=True)
-	rospy.Subscriber('SENSORS', UInt8 , plotting)
-    data_collect(data)
+	rospy.Subscriber('SENSORS', String , plotting)
 	plt.show()
 	rospy.spin()

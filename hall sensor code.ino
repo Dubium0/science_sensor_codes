@@ -4,7 +4,6 @@ int counter2 = 0 ;
 unsigned long myTimeStart;
 unsigned long myTimeFinish;
 bool StartTime = false;
-bool FinishTime = false;
 void setup() {
   pinMode(pinHall, INPUT);
   Serial.begin(9600);

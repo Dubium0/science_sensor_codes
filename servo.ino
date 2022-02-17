@@ -1,25 +1,36 @@
+#include <ros.h>
+
+#include <SoftwareSerial.h>
+
 #include <Servo.h>
- 
-Servo myservo; // create servo object to control a servo
-// twelve servo objects can be created on most boards
- 
-int pos = 0; // variable to store the servo position
- 
-void setup()
-{
-  myservo.attach(9); // attaches the servo on pin 9 to the servo object
+#include <std_msgs/Int32.h>
+
+ros::NodeHandle nh;
+Servo myservo;
+
+void servoC(const std_msgs::Int32& cmd_msg){
+  if (cmd_msg.data ==0){
+  for (int i =  0; i<=150;i+=2){myservo.write(i);  delay(15);   }
+ delay(1000);}}
+
+
+  // create servo object to control a servo
+ros::Subscriber<std_msgs::Int32> sub("motor",servoC);
+void setup() {
+  myservo.attach(9);  // attaches the servo on pin 9 to the servo object
+  nh.initNode();
+  nh.subscribe(sub);
 }
- 
-void loop()
-{
-  for(pos = 0; pos <= 180; pos += 1) // goes from 0 degrees to 180 degrees
-  { // in steps of 1 degree
-    myservo.write(pos); // tell servo to go to position in variable 'pos'
-    delay(15); // waits 15ms for the servo to reach the position
-  }
-  for(pos = 180; pos>=0; pos-=1) // goes from 180 degrees to 0 degrees
-  {
-    myservo.write(pos); // tell servo to go to position in variable 'pos'
-    delay(15); // waits 15ms for the servo to reach the position
-  }
+
+void loop() {
+
+nh.spinOnce();
+delay(1);
 }
+
+
+
+
+  
+ 
+                  

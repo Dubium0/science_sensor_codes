@@ -1,34 +1,113 @@
+
 #include <ros.h>
+#include <std_msgs/String.h>
+#include <Wire.h>
+#include <std_msgs/Float32.h>
+#include <std_msgs/Float32MultiArray.h>
 
-#include <SoftwareSerial.h>
+// defines pins numbers
+const int tubeStepPin = 9; 
+const int tubeDirPin = 8; 
 
-#include <Servo.h>
-#include <std_msgs/Int32.h>
+const int shovelStepPin = 11; 
+const int shovelDirPin = 12;
+
 
 ros::NodeHandle nh;
-Servo myservo;
+std_msgs::String allSensor_msg;
 
-void servoC(const std_msgs::Int32& cmd_msg){
-  if (cmd_msg.data ==0){
-  for (int i =  0; i<=150;i+=2){myservo.write(i);  delay(15);   }
- delay(1000);}}
+void tubes(const std_msgs::Float32& cmd_msg){
+
+   
+    digitalWrite(tubeDirPin,LOW); // Enables the motor to move in a particular direction
+  // Makes 200 pulses for making one full cycle rotation
+  for(float x = 0; x < cmd_msg.data; x++) {
+    digitalWrite(tubeStepPin,HIGH); 
+    delayMicroseconds(800); 
+    digitalWrite(tubeStepPin,LOW); 
+    delayMicroseconds(800); 
+  }
+  // One second delay
+  
+ delay(1000); 
+ 
+}
+
+void shovelUp(const std_msgs::Float32& cmd_msg){
+
+    digitalWrite(shovelDirPin,HIGH); // Enables the motor to move in a particular direction
+  // Makes 200 pulses for making one full cycle rotation
+  for(float x = 0; x < cmd_msg.data; x++) {
+    digitalWrite(shovelStepPin,HIGH); 
+    delayMicroseconds(500); 
+    digitalWrite(shovelStepPin,LOW); 
+    delayMicroseconds(500); 
+  }
+  // One second delay
+  delay(1000);
+ 
+}
+
+void shovelDown(const std_msgs::Float32& cmd_msg){
+
+    digitalWrite(shovelDirPin,LOW); // Enables the motor to move in a particular direction
+  // Makes 200 pulses for making one full cycle rotation
+  for(float x = 0; x < cmd_msg.data; x++) {
+    digitalWrite(shovelStepPin,HIGH); 
+    delayMicroseconds(800); 
+    digitalWrite(shovelStepPin,LOW); 
+    delayMicroseconds(800); 
+  }
+  // One second delay
+  
+ delay(1000);
+ 
+}
 
 
-  // create servo object to control a servo
-ros::Subscriber<std_msgs::Int32> sub("motor",servoC);
+ros::Publisher Sensors("SENSORS",&allSensor_msg);
+
+ros::Subscriber<std_msgs::Float32> Tubes("tubes",tubes);
+ros::Subscriber<std_msgs::Float32> ShovelUp("shovelUp",shovelUp);
+
+ros::Subscriber<std_msgs::Float32> ShovelDown("shovelDown",shovelDown);
+
+ 
 void setup() {
-  myservo.attach(9);  // attaches the servo on pin 9 to the servo object
+
+   pinMode(tubeStepPin,OUTPUT); 
+  pinMode(tubeDirPin,OUTPUT);
+    pinMode(shovelStepPin,OUTPUT); 
+  pinMode(shovelDirPin,OUTPUT);
   nh.initNode();
-  nh.subscribe(sub);
+  //nh.advertise(Sensors);
+  nh.subscribe(Tubes);
+  nh.subscribe(ShovelDown);
+  nh.subscribe(ShovelUp);
 }
-
+  
 void loop() {
-
-nh.spinOnce();
-delay(1);
+  
+   //readData();
+   nh.spinOnce();
+   delay(1);
 }
 
 
+void readData(){
+
+  
+   String gas = String(analogRead(A5)); // MQ-2
+    String methan = String(analogRead(A6)); // MQ-4
+    String carbonMono = String(analogRead(A1)); // MQ-7
+    String karbon = "135";
+    String alldatas = gas + "," + methan + "," + carbonMono +","+ karbon;
+     
+  
+    allSensor_msg.data = alldatas.c_str();
+    
+    Sensors.publish( &allSensor_msg );
+}
 
 
   
